@@ -1,0 +1,6 @@
+[package]
+name = "bidirectional-hashmap"
+version = "0.1.0"
+authors = ["Bram van den Heuvel <b.vandenheuvel@student.tudelft.nl>"]
+
+[dependencies]
