@@ -21,7 +21,8 @@ impl<T: Copy + Eq + Hash, U: Copy + Eq + Hash> BiMap<T, U> {
         self.right_to_left.get(r)
     }
     pub fn insert(&mut self, l: T, r: U) {
-        assert!(self.left_to_right.get(&l).is_none() || self.left_to_right.get(&l).unwrap() == &r);
+        assert!((!self.left_to_right.contains_key(&l) && !self.right_to_left.contains_key(&r)) ||
+            (self.left_to_right.get(&l).is_some() && self.left_to_right.get(&l).unwrap() == &r));
         self.left_to_right.insert(l, r);
         self.right_to_left.insert(r, l);
     }
@@ -34,6 +35,11 @@ impl<T: Copy + Eq + Hash, U: Copy + Eq + Hash> BiMap<T, U> {
         let old_r = self.remove(l);
         self.insert(*l, r);
         old_r
+    }
+    pub fn update_value(&mut self, r: &U, l: T) -> Option<T> {
+        let old_l = self.remove_value(r);
+        self.insert_value(*r, l);
+        old_l
     }
     pub fn remove(&mut self, l: &T) -> Option<U> {
         if let Some(value) = self.left_to_right.get(l) {
