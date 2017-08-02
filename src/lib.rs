@@ -43,24 +43,43 @@ impl<T: Copy + Eq + Hash, U: Copy + Eq + Hash> BiMap<T, U> {
     }
 }
 
-fn get<'a, T: Copy + Eq + Hash, U: Copy + Eq + Hash>(map: &'a HashMap<T, U>, key: &T) -> Option<&'a U> {
+fn get<'a, T: Copy + Eq + Hash, U: Copy + Eq + Hash>(
+    map: &'a HashMap<T, U>,
+    key: &T,
+) -> Option<&'a U> {
     map.get(key)
 }
 
-fn insert<T: Copy + Eq + Hash, U: Copy + Eq + Hash>(mut map1: &mut HashMap<T, U>, mut map2: &mut HashMap<U, T>, v1: T, v2: U) {
-    assert!((!map1.contains_key(&v1) && !map2.contains_key(&v2)) ||
-        (map1.get(&v1).is_some() && map1.get(&v1).unwrap() == &v2));
+fn insert<T: Copy + Eq + Hash, U: Copy + Eq + Hash>(
+    mut map1: &mut HashMap<T, U>,
+    mut map2: &mut HashMap<U, T>,
+    v1: T,
+    v2: U,
+) {
+    assert!(
+        !map1.contains_key(&v1) && !map2.contains_key(&v2) ||
+            map1.get(&v1).is_some() && map1.get(&v1).unwrap() == &v2
+    );
     map1.insert(v1, v2);
     map2.insert(v2, v1);
 }
 
-fn update<T: Copy + Eq + Hash, U: Copy + Eq + Hash>(mut map1: &mut HashMap<T, U>, mut map2: &mut HashMap<U, T>, v1: &T, v2: U) -> Option<U> {
+fn update<T: Copy + Eq + Hash, U: Copy + Eq + Hash>(
+    mut map1: &mut HashMap<T, U>,
+    mut map2: &mut HashMap<U, T>,
+    v1: &T,
+    v2: U,
+) -> Option<U> {
     let old_v2 = remove(map1, map2, v1);
     insert(map1, map2, *v1, v2);
     old_v2
 }
 
-fn remove<T: Copy + Eq + Hash, U: Copy + Eq + Hash>(mut map1: &mut HashMap<T, U>, mut map2: &mut HashMap<U, T>, key: &T) -> Option<U> {
+fn remove<T: Copy + Eq + Hash, U: Copy + Eq + Hash>(
+    mut map1: &mut HashMap<T, U>,
+    mut map2: &mut HashMap<U, T>,
+    key: &T,
+) -> Option<U> {
     if let Some(value) = map1.get(key) {
         map2.remove(value);
     }
