@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-pub struct BiMap<T, U> {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct BiMap<T: Clone + Copy + Eq + Hash, U: Clone + Copy + Eq + Hash> {
     left_to_right: HashMap<T, U>,
     right_to_left: HashMap<U, T>,
 }
@@ -20,6 +21,11 @@ impl<T: Copy + Eq + Hash, U: Copy + Eq + Hash> BiMap<T, U> {
         self.right_to_left.get(r)
     }
     pub fn insert(&mut self, l: T, r: U) {
+        assert!(self.left_to_right.get(&l).is_none() || self.left_to_right.get(&l).unwrap() == &r);
+        self.left_to_right.insert(l, r);
+        self.right_to_left.insert(r, l);
+    }
+    pub fn insert_value(&mut self, r: U, l: T) {
         assert!(self.left_to_right.get(&l).is_none() || self.left_to_right.get(&l).unwrap() == &r);
         self.left_to_right.insert(l, r);
         self.right_to_left.insert(r, l);
@@ -62,6 +68,13 @@ mod tests {
     fn insert_single() {
         let mut map: BiMap<&str, &str> = BiMap::new();
         map.insert("abc", "xyz");
+
+        assert_eq!(map.get(&"abc"), Some(&"xyz"));
+        assert_eq!(map.get_value(&"xyz"), Some(&"abc"));
+        assert_eq!(map.len(), 1);
+
+        let mut map: BiMap<&str, &str> = BiMap::new();
+        map.insert_value("xyz", "abc");
 
         assert_eq!(map.get(&"abc"), Some(&"xyz"));
         assert_eq!(map.get_value(&"xyz"), Some(&"abc"));
@@ -139,5 +152,31 @@ mod tests {
         assert_eq!(map.get_value(&"def"), Some(&"abc"));
         assert_eq!(map.len(), 1);
         assert_eq!(map.left_to_right.len(), map.right_to_left.len());
+    }
+
+    #[test]
+    fn eq() {
+        let mut map1: BiMap<&str, &str> = BiMap::new();
+        let mut map2: BiMap<&str, &str> = BiMap::new();
+
+        assert_eq!(map1, map2);
+
+        map1.insert("abc", "xyz");
+        map2.insert("abc", "xyz");
+
+        assert_eq!(map1, map2);
+    }
+
+    #[test]
+    fn clone() {
+        let mut map1: BiMap<&str, &str> = BiMap::new();
+        let map2 = map1.clone();
+
+        assert_eq!(map1, map2);
+
+        map1.insert("abc", "def");
+        let map2 = map1.clone();
+
+        assert_eq!(map1, map2);
     }
 }
